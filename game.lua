@@ -29,20 +29,8 @@ M.resetVariables = function()
     canJump, ply, shoots, stopped, game = false, nil, false, false, true
 end
 
-M.setCreator = function( c )
-    creator = c
-end
-
-M.setInterface = function( i )
-    interface = i
-end
-
-M.setComposer = function( comp )
-    composer = comp
-end
-
-M.setBlocks = function( blocks )
-    blocksArray = blocks
+M.setUp = function( comp,c,bA,i)
+    composer, creator, blocksArray, interface = comp, c, bA, i
 end
 
 M.setJump = function( boolean )
@@ -55,6 +43,10 @@ end
 
 M.setGame = function( gameVal )
     game = gameVal
+end
+
+M.setBlocks = function( blocks )
+  blocksArray = blocks
 end
 
 M.setShoots = function( val )
@@ -217,13 +209,13 @@ end
 M.playerEvent = function( event )
     if (game == true) then
         if event.phase == "down" then
-            if event.keyName == "enter" then
+            if (event.keyName == "buttonX") then
                     if (pause) then
                         M.unpause()
                     else
                         M.pause()
                     end
-            else
+            elseif (event.keyName == "buttonA" and pause == false) then
                 pressed = true
                 if (shoots == false) then
                         M.shoot()
@@ -234,16 +226,14 @@ M.playerEvent = function( event )
             pressed = false
         end
     end
-
 end
 
-M.jump = function()
-    if (canJump == true) then
+M.jump = function( event )
+    if (canJump == true and (math.abs(event.x) > 400 or math.abs(event.y) > 400) and pressed == false and event.phase == "ended" and game == true) then
         audio.play(jumpSound)
         ply:setLinearVelocity( 0, -300 )
         canJump = false
         ply:pause()
-    else canJump = false
     end
 end
     

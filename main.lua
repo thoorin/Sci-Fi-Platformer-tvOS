@@ -12,6 +12,11 @@ composer.setVariable( "playerStartingPosition", playerStartingPosition )
 
 display.setStatusBar(display.HiddenStatusBar);
 
-system.setIdleTimer( false )
+function onSystemEvent( event )
+    if event.type == "applicationResume" then
+        display.setStatusBar(display.HiddenStatusBar);
+    end
+end
+Runtime:addEventListener("system", onSystemEvent)
 
 composer.gotoScene( "menu" )

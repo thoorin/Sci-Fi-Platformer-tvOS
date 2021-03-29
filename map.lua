@@ -18,6 +18,25 @@ end
 local ar = {}
 local maxRecords = {0,200,650,1025,1275,300,650,850,1500,2475}
 
+local selector
+local selectedLevel = 1
+
+local indentOFElement = display.actualContentWidth/5.45
+local elementOriginX = display.actualContentWidth/8.67
+
+local indentOFElementEnv0 = display.actualContentWidth/3.8
+local elementOriginXEnv0 = display.actualContentWidth*0.38
+
+local arrowY = display.actualContentHeight*0.1+5
+local leftArrowX = display.screenOriginX + display.actualContentWidth*0.14
+local rightArrowX = display.screenOriginX + display.actualContentWidth*0.84
+
+local wrongSound = audio.loadSound( "wrong.mp3" )
+
+local selectorY = 240
+
+local selectorPosition = "low"
+
 local background
 
 local function cleanMap()
@@ -27,14 +46,15 @@ local function cleanMap()
         ar = {}
 end
 
-function createMap( environment )
+function createMap( environment, selectorPosition )
         cleanMap()
-        local curLevel = fileHandler.getCurrentLevel()
 
+        local curLevel = fileHandler.getCurrentLevel()
         local arrow
         local j
 
         local planet = display.newEmbossedText(sceneGroup,"",display.screenOriginX + display.actualContentWidth*0.5,50,"PermanentMarker-Regular.ttf",50)
+
         local color = 
         {
                 highlight = { r=0, g=0, b=0 },
@@ -45,7 +65,7 @@ function createMap( environment )
         planet.anchorX = 0.5
 
         local numberOfElements
-
+  
         if (environment == 0) then
                 planet.text = "Miscellaneous"
                 planet:setFillColor(0,0,0.8)
@@ -93,6 +113,15 @@ function createMap( environment )
                 numberOfElements = 5
         end
         table.insert(ar,arrow)
+        
+        selector = display.newRect(sceneGroup, display.screenOriginX + indentOFElement*(selectorPosition-1) + elementOriginX, selectorY, 150, 250)
+        selector.strokeWidth = 3
+        selector:setStrokeColor( 1, 1, 1 )
+        selector:setFillColor( 0, 0, 0, 0 )
+        table.insert(ar,selector)
+        if (environment == 0) then
+                selector.x = selector.x - 23
+        end
 
         for i=0,numberOfElements-1 do
                 local elementX = display.screenOriginX + display.actualContentWidth/8.67 + i * display.actualContentWidth/5.45
@@ -126,7 +155,7 @@ function createMap( environment )
                         state = "played"
                 elseif (curLevel == j+i) then
 
-                        if (fileHandler.getRecord(curLevel)==nil) then
+                       if (fileHandler.getRecord(curLevel)==-1) then
                                 recordInPercentage = display.newText(sceneGroup, "0 %", recordX, recordY, native.systemFontBold, 20)
                                 levelTitle:setTextColor( unpack(availableColor))
                                 state = "current"
@@ -188,6 +217,9 @@ function scene:create( event )
     background.fill.effect.color2 = { 0.2, 0.2, 0.8, 1 }
     background.fill.effect.center_and_radiuses  =  { 0.5, 0.5, 0.25, 0.75 }
     background.fill.effect.aspectRatio  = 1
+    
+    composer.setVariable("env",1)
+    createMap(1,1)
 end
 
 
@@ -198,8 +230,137 @@ function scene:show( event )
 	local phase = event.phase
 
         if ( phase == "will" ) then
-                composer.setVariable("env",1)
-                createMap(1)
+          
+          local function onRTouchEvent( event )
+            if (event.phase == "ended") then
+              if (math.abs(event.x) > 400 ) then
+                                        if (selectorPosition == "low") then
+                                                local indent = indentOFElement
+
+                                                local levelChange = 1
+
+                                                if (event.x < 0) then
+                                                        levelChange = -levelChange
+                                                end
+
+                                                if ((selectedLevel ~= 10 or levelChange == -1) and (selectedLevel ~=-1 or levelChange == 1)) then
+                                                        if (selectedLevel == 1 and levelChange == -1) then
+                                                                composer.setVariable("env",0)
+                                                                createMap(0,4)
+                                                                indent = 0
+                                                        elseif (selectedLevel == 5 and levelChange == 1) then
+                                                                composer.setVariable("env",2)
+                                                                createMap(2,1)
+                                                                indent = 0
+                                                        elseif (selectedLevel == 6 and levelChange == -1) then
+                                                                composer.setVariable("env",1)
+                                                                createMap(1,5)
+                                                                indent = 0
+                                                        elseif (selectedLevel == 0 and levelChange == 1) then
+                                                                composer.setVariable("env",1)
+                                                                createMap(1,1)
+                                                                indent = 0
+                                                        elseif (selectedLevel <=0 )then
+                                                                indent = indentOFElementEnv0
+                                                        end
+                                                        selectedLevel = selectedLevel + levelChange
+                                                        selector.x = selector.x + indent*levelChange
+                                                end
+                                        else
+                                                if (event.x > 0 and selectedLevel < 6) then
+                                                        selector.x = rightArrowX
+                                                elseif (selectedLevel > 0) then
+                                                        selector.x = leftArrowX
+                                                end
+                                        end
+                                elseif (event.y < -400) then
+                                        selector.y = arrowY
+                                        selector.x = selectedLevel <=0 and rightArrowX or leftArrowX
+                                        selector.height = 70
+                                        selector.width = 70
+                                        selectorPosition = "high"
+                                elseif (event.y > 400) then
+                                        selector.height = 250
+                                        selector.width = 150
+                                        selector.x = selectedLevel <= 0 and display.screenOriginX + indentOFElement*3 + elementOriginX - 23 or display.screenOriginX + elementOriginX
+                                        selector.y = selectorY
+                                        if (selectedLevel <= 0) then
+                                                selectedLevel = 0
+                                        elseif (selectedLevel < 6) then
+                                                selectedLevel = 1
+                                        else
+                                                selectedLevel = 6
+                                        end
+                                        selectorPosition = "low"
+                                end
+              end
+          end
+
+        local function onKeyEvent( event )
+                        if (event.phase == "down") then
+                                if (event.keyName == "buttonA") then
+                                        if (selectorPosition == "high") then
+                                                if (selector.x < 500) then
+                                                        if (selectedLevel > 5) then
+                                                                composer.setVariable("env",1)
+                                                                createMap(1,1)
+                                                                selectedLevel = 1
+                                                        else
+                                                                composer.setVariable("env",0)
+                                                                createMap(0,4)
+                                                                selectedLevel = 0
+                                                        end
+                                                else 
+                                                        if (selectedLevel < 1) then
+                                                                composer.setVariable("env",1)
+                                                                createMap(1,1)
+                                                                selectedLevel = 1
+                                                        else
+                                                                composer.setVariable("env",2)
+                                                                createMap(2,1)
+                                                                selectedLevel = 6
+                                                        end
+                                                end
+                                                selectorPosition = "low"
+                                        else
+                                                if (selectedLevel == 0) then           
+                                                        composer.gotoScene( "credits" )
+                                                        composer.removeScene("map", true)
+                                                        audio.play(clickSound)
+
+                                                        Runtime:removeEventListener("key", onKeyEvent)
+                                                        Runtime:removeEventListener( "relativeTouch", onRTouchEvent )
+                                                        selectedLevel = 1
+                                                elseif (selectedLevel == -1)then
+                                                        composer.gotoScene( "level" )
+                                                        composer.removeScene("map", true)
+                                                        composer.setVariable( "lvl", 0 )
+                                                        audio.play(clickSound)
+
+                                                        Runtime:removeEventListener("key", onKeyEvent)
+                                                        Runtime:removeEventListener( "relativeTouch", onRTouchEvent )
+                                                        selectedLevel = 1
+                                                else
+                                                        local curLevel = fileHandler.getCurrentLevel()
+                                                        if (selectedLevel > curLevel) then
+                                                                audio.play(wrongSound)
+                                                        else
+                                                                composer.gotoScene( "level" )
+                                                                composer.removeScene("map", true)
+                                                                composer.setVariable( "lvl", selectedLevel )
+                                                                audio.play(clickSound) 
+                                                                Runtime:removeEventListener("key", onKeyEvent)
+                                                                Runtime:removeEventListener( "relativeTouch", onRTouchEvent )
+                                                                selectedLevel = 1
+                                                        end
+                                                end
+
+                                        end
+                                end
+                        end
+                end
+                Runtime:addEventListener( "key", onKeyEvent )
+                Runtime:addEventListener( "relativeTouch", onRTouchEvent )
 
         elseif ( phase == "did" ) then
         end

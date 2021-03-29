@@ -1,1 +1,3 @@
-# Sci-Fi-Platformer-tvOS
+# Sci-Fi-Platformer-iOS
+
+Version for iOS

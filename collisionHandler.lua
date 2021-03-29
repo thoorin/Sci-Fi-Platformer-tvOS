@@ -33,11 +33,8 @@ M.setBlocksContacted = function( val )
     blocksContacted = val
 end
 
-M.setVariables = function (g,c,i,fG,sc,bC)
-    game = g
-    creator = c
-    interface = i
-    frontGroup = fG
+M.setUp = function (g,c,i,fG,sc,bC)
+    game, creator, interface, frontGroup = g, c, i, fG
     M.setScore(sc)
     M.setBlocksContacted(bC)
 end

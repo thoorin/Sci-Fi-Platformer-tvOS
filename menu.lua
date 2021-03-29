@@ -4,9 +4,6 @@ local fileHandler = require( "fileHandler" )
 local scene = composer.newScene()
 clickSound = audio.loadSound( "click.ogg" )
 
-
-
-
 local function textChangeSize(text,increase)
         local increaseNext = 1
         if (increase == 1) then
@@ -44,7 +41,7 @@ function scene:create( event )
         background.x = display.contentCenterX
         background.y = display.contentCenterY
 
-        local tapStartText = display.newEmbossedText(sceneGroup, "Touch to start", display.contentWidth-display.actualContentWidth*0.5, display.contentCenterY + 170, "PermanentMarker-Regular.ttf", 45)   
+        local tapStartText = display.newEmbossedText(sceneGroup, "tap to start", display.contentWidth-display.actualContentWidth*0.5, display.contentCenterY + 170, "PermanentMarker-Regular.ttf", 45)   
         tapStartText:setTextColor( 1, 1, 1 )
 
         textChangeSize(tapStartText,1)
@@ -65,10 +62,7 @@ function scene:create( event )
 
         local function onKeyEvent( event )
             --if (event.keyName == "buttonA") then
-                local path = system.pathForFile( "currentLevel.txt", system.DocumentsDirectory )
-                local file = io.open( path )
-
-                if not file then
+                if (fileHandler.getCurrentLevel() == 0) then
                     composer.gotoScene("level")
                     composer.setVariable("lvl",0);
                 else
@@ -101,7 +95,7 @@ function scene:hide( event )
 
 	if ( phase == "will" ) then
         -- Code here runs when the scene is on screen (but is about to go off screen)
-
+        
         elseif ( phase == "did" ) then
 	end
 end

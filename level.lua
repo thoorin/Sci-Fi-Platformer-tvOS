@@ -23,8 +23,6 @@ local musicTrack
 audio.reserveChannels( 1 )
 audio.setVolume( 0.5, { channel=1 } )
 
-local gameTitle
-
 function setSceneGroup()
         sceneGroup:insert( creator.getBackGroup() )
         sceneGroup:insert( creator.getMiddleGroup() )
@@ -36,7 +34,6 @@ end
 function getSceneGroup()
         return sceneGroup
 end
-
 
 
 -- -----------------------------------------------------------------------------------
@@ -69,6 +66,7 @@ function scene:show( event )
         -- Code here runs when the scene is still off screen (but is about to come on screen)
         Runtime:addEventListener( "collision", collisionHandler.onCollision )
         Runtime:addEventListener( "key", game.playerEvent  )
+        Runtime:addEventListener( "relativeTouch", game.jump )
 
         gameLoopTimer = timer.performWithDelay( 25, game.gameLoop, 0 )
 
@@ -77,31 +75,19 @@ function scene:show( event )
                 creator = require("creator")
                 creator.setGame(game)
 
-                builder.setUpLevel(creator, game, collisionHandler, composer.getVariable("lvl"))
+                builder.setUp(creator, game, collisionHandler, composer.getVariable("lvl"))
 
                 musicTrack = composer.getVariable("lvl") > 5 and audio.loadStream( "dessert_song.MP3") or audio.loadStream( "s6.mp3")
 
-                game.setComposer(composer)
-                game.setCreator(creator)
-                game.setBlocks(creator.getBlocksArray())
-                game.setInterface(interface)
-                --game.movePlayer(0)
-                --game.moveForward(8000)
+                game.setUp(composer,creator,creator.getBlocksArray(),interface)
                 
-                interface.setGame(game)
-                interface.setCreator(creator)
-                interface.setBuilder(builder)
-                interface.setCollisionHandler(collisionHandler)
-                interface.setFileHandler(fileHandler)
-                interface.pauseIcon()
-
-                collisionHandler.setVariables(game,creator,interface,creator.getFrontGroup(),0,0)
+                interface.setUp(game,creator,builder,collisionHandler,fileHandler)
+                
+                collisionHandler.setUp(game,creator,interface,creator.getFrontGroup(),0,0)
 
                 game.moving()                  
                 audio.play( musicTrack, { channel=1, loops=-1 } )
                 setSceneGroup()
-                
-
 	end
 end
 
@@ -123,7 +109,8 @@ function scene:hide( event )
         blocksArray = nil
 
         Runtime:removeEventListener( "collision", collisionHandler.onCollision )
-        Runtime:removeEventListener( "touch", game.playerEvent )
+        Runtime:removeEventListener( "key", game.playerEvent )
+        Runtime:removeEventListener( "relativeTouch", game.jump )
         package.loaded["creator"] = nil
         audio.stop(1)
         

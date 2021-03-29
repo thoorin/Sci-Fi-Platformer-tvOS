@@ -21,5 +21,17 @@ settings =
             		UILaunchStoryboardName = "LaunchScreen",  
             		UIStatusBarHidden = true
         	},
-	}
+	},
+      tvos =
+    {
+        iCloud = true,
+    },
+      plugins =
+    {
+        ["plugin.iCloud"] =
+        {
+            publisherId = "com.coronalabs",
+            supportedPlatforms = { appletvos=true }
+        },
+    },
 }

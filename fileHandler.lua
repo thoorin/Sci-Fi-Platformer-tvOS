@@ -8,130 +8,31 @@ local M = {}
 local fileName = "recordsPlatformer.txt"
 local fileName2 = "currentLevel.txt"
 local level 
+local iCloud = require( "plugin.iCloud" )
 
-M.generateFiles = function()
-    print("Generating files")
-    local path = system.pathForFile( fileName, system.DocumentsDirectory )
-    local file = io.open( path )
-    if not file then
-        io.close()
-        io.open( path, "w" )
-        io.close()
+M.generateKVS = function()
+  if (iCloud.get("1") == nil) then
+    for i = 1,10 do
+      iCloud.set(tostring(i),-1)
     end
-
-    path = system.pathForFile( fileName2, system.DocumentsDirectory )
-    file = io.open( path )
-    
-    if not file then
-        io.close()
-        io.open( path, "w" )
-        io.close()
-    end
+    iCloud.set("currentLevel",0)
+  end
 end
 
 M.getRecord = function(lvl)
-    local path = system.pathForFile( fileName, system.DocumentsDirectory )
-    local file, errorString = io.open( path, "r" )
-    level = lvl
-    
-    local records = {}
-
-    if not file then
-        print( "File error: " .. errorString )
-    else
-        
-        for line in file:lines() do
-            table.insert(records,tonumber(line))
-        end
-        io.close( file )
-    end
-
-    file = nil
-
-    return records[level]
+    return iCloud.get(tostring(lvl))
 end
 
-M.writeRecord = function(record)
-    local records = {}
-
-    local path = system.pathForFile( fileName, system.DocumentsDirectory )
-
-    local file, errorString = io.open( path, "r" )
- 
-    if not file then
-        print( "File error: " .. errorString )
-    else
-
-    for line in file:lines() do
-        table.insert(records,line)
-    end
-
-
-    if (records[level]~=nil) then
-        table.remove(records,level)
-    end
-
-    table.insert(records,level,record)
-
-    io.close( file )
-    end
-
-    file, errorString = io.open( path, "w" )
- 
-    if not file then
-        print( "File error: " .. errorString )
-    else
-
-    for i in ipairs(records) do
-        file:write( records[i] )
-        file:write( "\n" )
-    end
-    io.close( file )
-    end
- 
-    file = nil
+M.writeRecord = function(record,level)
+    iCloud.set(tostring(level),record)
 end
 
 M.getCurrentLevel = function()
-    local path = system.pathForFile( fileName2, system.DocumentsDirectory )
-    local file, errorString = io.open( path, "r" )
-    local currentLevel
-
-    if not file then
-        print( "File error: " .. errorString )
-    else
-        currentLevel = file:read( "*n" )
-        io.close( file )
-    end
-
-    file = nil
-
-    if (currentLevel == nil) then
-        currentLevel = 1
-    end
-
-    return currentLevel
+    return iCloud.get("currentLevel")
 end
-
 
 M.updateCurrentLevel = function()
-    local path = system.pathForFile( fileName2, system.DocumentsDirectory )
-    local currentLevel = M.getCurrentLevel() + 1
-
-    local file, errorString = io.open( path, "w" )
-
-    if not file then
-        print( "File error: " .. errorString )
-    else
-
-    file:write( currentLevel )
-
-    io.close( file )
-    end
- 
-    file = nil
+    iCloud.set("currentLevel",iCloud.get("currentLevel")+1)
 end
-
-
 
 return M

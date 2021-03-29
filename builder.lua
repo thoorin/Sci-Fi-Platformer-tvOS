@@ -45,6 +45,7 @@ local function createSetOfBlocks(start,top,width)
     end
 end
 
+
 local function createSetOfBlocksLeftHill(start,top,width,hillWidth,hillTop)
     local hillStart = start+(width-hillWidth)*32+32
     local heightInPixels = display.contentHeight - top
@@ -110,7 +111,7 @@ local function createSetOfBlocksLeftHill(start,top,width,hillWidth,hillTop)
     b2(hillStart,t1)
     b3(hillStart,t2)
     for j=1,heightStartHill do 
-        b4(hillStart,hillTop + 32*j)
+        b4(hillStart,t2 + 32*j)
     end
 
     endOfBlocks = hillStart + hillWidth*31
@@ -133,6 +134,7 @@ local function createSetOfBlocksLeftHill(start,top,width,hillWidth,hillTop)
     end
 
 end
+
 
 local function createLevel0()
     g.setPlayer(c.createPlayer(100))
@@ -2306,7 +2308,7 @@ local function createLevel(level)
   createLevels[level+1]()
 end
 
-M.setUpLevel = function(creator, game, collisionHandler, level)
+M.setUp = function(creator, game, collisionHandler, level)
   setVariables(creator,game,collisionHandler)
   createLevel(level)
 end

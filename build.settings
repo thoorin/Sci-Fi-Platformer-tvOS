@@ -25,6 +25,7 @@ settings =
       tvos =
     {
         iCloud = true,
+	xcassets = "Images.xcassets",
     },
       plugins =
     {

@@ -55,6 +55,21 @@ function scene:create( event )
 
 end
 
+local function playerEvent( event )
+  if (game.getGame()) then
+    if (event.keyName == "menu") then
+            timer.cancelAll()
+            composer.gotoScene("map")
+            composer.removeScene( "level", true )
+            audio.stop(31)
+    
+            Runtime:removeEventListener("key", playerEvent)
+            Runtime:removeEventListener( "relativeTouch", game.shoot)
+    else 
+        game.playerEvent(event)
+    end
+    end
+end
 
 -- show()
 function scene:show( event )
@@ -65,8 +80,8 @@ function scene:show( event )
 	if ( phase == "will" ) then
         -- Code here runs when the scene is still off screen (but is about to come on screen)
         Runtime:addEventListener( "collision", collisionHandler.onCollision )
-        Runtime:addEventListener( "key", game.playerEvent  )
-        Runtime:addEventListener( "relativeTouch", game.jump )
+        Runtime:addEventListener( "key", playerEvent  )
+        Runtime:addEventListener( "relativeTouch", game.shoot )
 
         gameLoopTimer = timer.performWithDelay( 25, game.gameLoop, 0 )
 
@@ -109,11 +124,10 @@ function scene:hide( event )
         blocksArray = nil
 
         Runtime:removeEventListener( "collision", collisionHandler.onCollision )
-        Runtime:removeEventListener( "key", game.playerEvent )
-        Runtime:removeEventListener( "relativeTouch", game.jump )
+        Runtime:removeEventListener( "key", playerEvent )
+        Runtime:removeEventListener( "relativeTouch", game.shoot )
         package.loaded["creator"] = nil
         audio.stop(1)
-        
 	end
 end
 

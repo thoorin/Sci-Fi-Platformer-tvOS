@@ -112,15 +112,53 @@ local nextLevel = function()
         display.remove(elements[i])
     end
 
-    composer.removeScene( "level", true )
     if (level > 10) then 
         composer.gotoScene("ending") 
-        composer.removeScene("level", true)
     else
         composer.setVariable("lvl", level)
         composer.gotoScene("level")
     end
+    composer.removeScene( "level", true )
     audio.play(clickSound)
+end
+
+local function closeLevel()
+      timer.cancelAll()
+      composer.gotoScene("map")
+
+      for i in ipairs(elements) do 
+          display.remove(elements[i])
+      end
+            
+      composer.removeScene( "level", true )
+                    
+      audio.stop(31)
+      audio.play(clickSound)
+end
+
+local function restartLevel()
+      game.setCanJump(false)
+      audio.stop(31)
+      game.destroyBlocks()
+      creator.destroyBlocks()
+      collisionHandler.destroyParticles()
+
+      timer.cancelAll()
+                
+      for i in ipairs(elements) do 
+        display.remove(elements[i])
+      end
+
+      collisionHandler.setBlocksContacted(0)
+      collisionHandler.setScore(0)
+
+      game.setBlocks(creator.getBlocksArray())
+
+      game.setGame(true)
+
+      composer.removeScene("level",true)
+      composer.gotoScene("level")
+      audio.play(clickSound)
 end
 
 M.winScreen = function()
@@ -178,48 +216,19 @@ M.winScreen = function()
     
     local function onKeyEvent( event )
         if (event.phase == "down") then
-            if (event.keyName == "buttonA") then
+            if (event.keyName == "menu") then
+              closeLevel()
+            elseif (event.keyName == "buttonA") then
                 if (selectorPosition == 0) then
-                    timer.cancelAll()
-                    composer.gotoScene("map")
-
-                    for i in ipairs(elements) do 
-                        display.remove(elements[i])
-                    end
-            
-                    composer.removeScene( "level", true )
-                    
-                    audio.stop(31)
-                    audio.play(clickSound)
+                    closeLevel()
                 elseif (selectorPosition == 1) then
-                    game.setCanJump(false)
-                    audio.stop(31)
-                    game.destroyBlocks()
-                    creator.destroyBlocks()
-                    collisionHandler.destroyParticles()
-
-                    timer.cancelAll()
-                
-                    for i in ipairs(elements) do 
-                        display.remove(elements[i])
-                    end
-
-                    collisionHandler.setBlocksContacted(0)
-                    collisionHandler.setScore(0)
-
-                    game.setBlocks(creator.getBlocksArray())
-
-                    game.setGame(true)
-
-                    composer.removeScene("level",true)
-                    composer.gotoScene("level")
-                    audio.play(clickSound)
+                    restartLevel()
                 else 
                     nextLevel()
                 end
+          end
                 Runtime:removeEventListener( "key", onKeyEvent )
                 Runtime:removeEventListener("relativeTouch", onRTouchEvent)
-            end
         end
       end
     
@@ -267,46 +276,17 @@ M.deathScreen = function()
     
     local function onKeyEvent( event )
         if (event.phase == "down") then
-              if (event.keyName == "buttonA") then
+              if (event.keyName == "menu") then
+                closeLevel()
+              elseif (event.keyName == "buttonA") then
                 if (selectorPosition == 0) then
-                    timer.cancelAll()
-                    composer.gotoScene("map")
-
-                    for i in ipairs(elements) do 
-                        display.remove(elements[i])
-                    end
-            
-                    composer.removeScene( "level", true )
-                    
-                    audio.stop(31)
-                    audio.play(clickSound)
+                    closeLevel()
                 elseif (selectorPosition == 1) then
-                    game.setCanJump(false)
-                    audio.stop(31)
-                    game.destroyBlocks()
-                    creator.destroyBlocks()
-                    collisionHandler.destroyParticles()
-
-                    timer.cancelAll()
-                
-                    for i in ipairs(elements) do 
-                        display.remove(elements[i])
-                    end
-
-                    collisionHandler.setBlocksContacted(0)
-                    collisionHandler.setScore(0)
-
-                    game.setBlocks(creator.getBlocksArray())
-
-                    game.setGame(true)
-
-                    composer.removeScene("level",true)
-                    composer.gotoScene("level")
-                    audio.play(clickSound)
+                    restartLevel()
                   end
+          end
                 Runtime:removeEventListener( "key", onKeyEvent )
                 Runtime:removeEventListener("relativeTouch", onRTouchEvent)
-            end
         end
 
     end

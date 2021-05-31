@@ -805,33 +805,41 @@ end
 
 local function touch( x )
     local touch = display.newImageRect(frontGroup, "touch.png", 105, 140 )
+    physics.addBody( touch, "kinematic", {bounce = 0} )
     touch.myName = "touch"
     touch.x, touch.y = x, 200
     touch.isSensor = true
     return touch
 end
 
+local function goTimer( right )
+  right.x = display.contentWidth-display.actualContentWidth*0.55     
+  right:setLinearVelocity(100,0)
+end
+
+local function stopTimer( right )
+  right:setLinearVelocity(0,0)
+  timer.performWithDelay(1500,function() goTimer(right) end)
+end
+
 M.createTouch = function()
     local scaleFactor = display.actualContentWidth/display.actualContentHeight/1.94
 
-    local leftX = display.contentWidth-display.actualContentWidth*0.65
-    local left = touch(leftX)
-    local text = display.newText(frontGroup,"      Touch left half \nof the screen to jump",leftX,300,"ethnocentric rg.ttf", 30, "center")
+    local text = display.newText(frontGroup,"      Press trackpad to jump",display.contentWidth-display.actualContentWidth*0.5,200,"ethnocentric rg.ttf", 30, "center")
     text:setFillColor(0,0,0.2);
     text:scale(scaleFactor,scaleFactor)
 
     local leftGroup = display.newGroup();
-    leftGroup:insert(left)
     leftGroup:insert(text)
     leftGroup.alpha = 0
 
     transition.fadeIn(leftGroup, { time = 1400});
     transition.fadeOut(leftGroup,{ time = 1400, delay = 6500});
 
-    local rightX = display.contentWidth-display.actualContentWidth*0.35
-    local right = touch(rightX)
+    local right = touch(display.contentWidth-display.actualContentWidth*0.55)
+    timer.performWithDelay(3000, function() stopTimer(right) end, 0)
 
-    local textRight = display.newText(frontGroup,"      Touch right half \nof the screen to shoot",rightX,300,"ethnocentric rg.ttf", 30, "center")
+    local textRight = display.newText(frontGroup,"      Swipe to shoot",display.contentWidth-display.actualContentWidth*0.5,300,"ethnocentric rg.ttf", 30, "center")
     textRight:setFillColor(0,0,0.2);
     textRight:scale(scaleFactor,scaleFactor)
 

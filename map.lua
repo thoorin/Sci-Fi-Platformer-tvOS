@@ -16,7 +16,7 @@ function getSceneGroup()
 end
 
 local ar = {}
-local maxRecords = {0,200,650,1025,1275,300,650,850,1500,2475}
+local maxRecords = {0,200,650,1025,1275,300,650,850,1500,2350}
 
 local selector
 local selectedLevel = 1
@@ -298,7 +298,12 @@ function scene:show( event )
 
         local function onKeyEvent( event )
                         if (event.phase == "down") then
-                                if (event.keyName == "buttonA") then
+                                if (event.keyName == "menu") then
+                                    composer.gotoScene("menu")
+                                    composer.removeScene("map")
+                                    Runtime:removeEventListener("key", onKeyEvent)
+                                    Runtime:removeEventListener( "relativeTouch", onRTouchEvent )
+                                elseif (event.keyName == "buttonA") then
                                         if (selectorPosition == "high") then
                                                 if (selector.x < 500) then
                                                         if (selectedLevel > 5) then

@@ -2,7 +2,9 @@
 local fileHandler = require( "fileHandler" )
 
 local scene = composer.newScene()
-clickSound = audio.loadSound( "click.ogg" )
+clickSound = audio.loadSound( "click.mp3" )
+
+local tapStartText
 
 local function textChangeSize(text,increase)
         local increaseNext = 1
@@ -41,10 +43,8 @@ function scene:create( event )
         background.x = display.contentCenterX
         background.y = display.contentCenterY
 
-        local tapStartText = display.newEmbossedText(sceneGroup, "tap to start", display.contentWidth-display.actualContentWidth*0.5, display.contentCenterY + 170, "PermanentMarker-Regular.ttf", 45)   
+        tapStartText = display.newEmbossedText(sceneGroup, "tap to start", display.contentWidth-display.actualContentWidth*0.5, display.contentCenterY + 170, "PermanentMarker-Regular.ttf", 45)   
         tapStartText:setTextColor( 1, 1, 1 )
-
-        textChangeSize(tapStartText,1)
         
         local gameTitle = display.newText(sceneGroup, "SCI-FI PLATFORMER", display.contentWidth-display.actualContentWidth*0.5, display.contentCenterY - 150, "akaDylan Collage.ttf", 52)   
         gameTitle:setTextColor( 0.3, 0.3, 1)
@@ -57,24 +57,6 @@ function scene:create( event )
         gameTitle.fill.effect.position2  = { 1, 1 }
         scaleFactor = display.actualContentWidth/display.actualContentHeight/1.77
         gameTitle:scale(scaleFactor,scaleFactor)
-
-        composer.setVariable("env",1)
-
-        local function onKeyEvent( event )
-            --if (event.keyName == "buttonA") then
-                if (fileHandler.getCurrentLevel() == 0) then
-                    composer.gotoScene("level")
-                    composer.setVariable("lvl",0);
-                else
-                    composer.gotoScene("map")
-                end
-
-                audio.play(clickSound)
-                Runtime:removeEventListener( "key", onKeyEvent )
-            --end
-        end
-         
-        Runtime:addEventListener( "key", onKeyEvent )
 end
 
 
@@ -83,8 +65,30 @@ function scene:show( event )
 	local phase = event.phase
 
         if ( phase == "will" ) then
+                  composer.setVariable("env",1)
 
-        elseif ( phase == "did" ) then
+                  local function onKeyEvent( event )
+                      if (event.keyName == "buttonA") then
+                          if (fileHandler.getCurrentLevel() == 0) then
+                              composer.gotoScene("level")
+                              composer.setVariable("lvl",0);
+                          else
+                              composer.gotoScene("map")
+                          end
+
+                          audio.play(clickSound)
+                          system.deactivate( "controllerUserInteraction" )
+                          Runtime:removeEventListener( "key", onKeyEvent )
+                      elseif (event.keyName == "menu") then
+                            system.activate( "controllerUserInteraction" )
+                            --Runtime:removeEventListener( "key", onKeyEvent )
+                      end
+                  end
+                   
+                  Runtime:addEventListener( "key", onKeyEvent )
+
+      elseif ( phase == "did" ) then
+                textChangeSize(tapStartText,1)
         end
 end
 

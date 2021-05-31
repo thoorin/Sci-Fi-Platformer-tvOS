@@ -215,12 +215,8 @@ M.playerEvent = function( event )
                     else
                         M.pause()
                     end
-            elseif (event.keyName == "buttonA" and pause == false) then
-                pressed = true
-                if (shoots == false) then
-                        M.shoot()
-                        shoots = true
-                end
+            elseif (event.keyName == "buttonA") then
+                M.jump()
             end
         else
             pressed = false
@@ -228,8 +224,8 @@ M.playerEvent = function( event )
     end
 end
 
-M.jump = function( event )
-    if (canJump == true and (math.abs(event.x) > 400 or math.abs(event.y) > 400) and pressed == false and event.phase == "ended" and game == true) then
+M.jump = function()
+    if (canJump == true and pressed == false and game) then
         audio.play(jumpSound)
         ply:setLinearVelocity( 0, -300 )
         canJump = false
@@ -237,13 +233,13 @@ M.jump = function( event )
     end
 end
     
-M.shoot = function()
-    audio.play(blastSound)
-    shoots = true
-    local vx,vy = ply:getLinearVelocity()
-    creator.createBullet(ply.x + 50, ply.y + 5)
-    --creator.createShootFlash(ply.x + 55, ply.y + 5,vy)
-    shootTimer = timer.performWithDelay( 200, function () shoots = false if (pressed == true and game == true) then M.shoot() end end, 1 )
+M.shoot = function( event )
+   if ((math.abs(event.x) > 400 or math.abs(event.y) > 400) and event.phase == "ended" and game) then
+      audio.play(blastSound)
+      shoots = true
+      local vx,vy = ply:getLinearVelocity()
+      creator.createBullet(ply.x + 50, ply.y + 5)
+    end
 end
 
 M.spriteListenerEnemy = function( event )
